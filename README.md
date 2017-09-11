@@ -32,6 +32,8 @@ __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en
 
 __Neil Maude:__ General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
 
+__Martin Liesenberg:__ Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
+
 # Original repo README
 
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
