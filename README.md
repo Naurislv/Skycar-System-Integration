@@ -30,7 +30,7 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor candidate at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
 
-__Neil Maude__ <neil.maude@gmail.com>: General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
+__Neil Maude__ (<neil.maude@gmail.com>): General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
 
 __Martin Liesenberg:__ Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
 
