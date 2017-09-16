@@ -23,10 +23,31 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 
+def get_closest_waypoint(pose_x, pose_y, waypoints):
+
+    # initial variables
+    closest_distance = 100000.0
+    closest_point = 0
+
+    for i in range(len(waypoints)):
+        # extract waypoint x,y
+        wp_x = waypoints[i].pose.pose.position.x
+        wp_y = waypoints[i].pose.pose.position.y
+        # compute distance from car x,y
+        distance = math.sqrt((wp_x - pose_x) ** 2 + (wp_y - pose_y) ** 2)
+        # is this point closer than others found so far
+        if distance < closest_distance:
+            closest_distance = distance
+            closest_point = i
+
+    # return closest point found
+    return closest_point
+
 
 class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
+        rospy.loginfo('Init waypoint_updater')
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -37,15 +58,52 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        # Format of self.var = init_value - declare and initialise
+
+        # Will need a list of waypoints
+        self.waypoints = []
 
         rospy.spin()
 
     def pose_cb(self, msg):
         # TODO: Implement
-        pass
+
+        # msg will be a geometry_msgs/PoseStamped message
+        # extract the current car x, y
+        pose_x = msg.pose.position.x
+        pose_y = msg.pose.position.y
+        # find the closest waypoint
+        closest_waypoint = get_closest_waypoint(pose_x, pose_y, self.waypoints)
+
+        # get waypoints ahead of the car
+        # this currently sends as many as are available
+        # should this fail if there aren't enough waypoints and just wait until there area enough? - NM
+        waypoints_ahead = []
+        n_waypoints = len(self.waypoints)               # can only get this many waypoints
+        if n_waypoints > LOOKAHEAD_WPS:
+            n_waypoints = LOOKAHEAD_WPS                 # max waypoints to pass over
+        for i in range(n_waypoints):
+            waypoints_ahead.append(self.waypoints[closest_waypoint+i])
+
+        # structure the data to match the expected styx_msgs/Lane form
+        lane = Lane()
+        lane.waypoints = waypoints_ahead                # list of waypoints ahead of the car
+        lane.header.stamp = rospy.Time(0)               # timestamp
+        lane.header.frame_id = msg.header.frame_id      # matching up with the input message frame_id
+
+        # publish the waypoints list
+        self.final_waypoints_pub.publish(lane)
+
+        #pass
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
+
+        # receive waypoints in message type styx_msgs/Lane form
+
+        # save these, to use when pose_cb is called later
+        self.waypoints = waypoints.waypoints
+
         pass
 
     def traffic_cb(self, msg):
