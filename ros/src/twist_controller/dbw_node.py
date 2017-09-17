@@ -46,22 +46,31 @@ class DBWNode(object):
         max_lat_accel = rospy.get_param('~max_lat_accel', 3.)
         max_steer_angle = rospy.get_param('~max_steer_angle', 8.)
 
-        self.steer_pub = rospy.Publisher('/vehicle/steering_cmd',
-                                         SteeringCmd, queue_size=1)
-        self.throttle_pub = rospy.Publisher('/vehicle/throttle_cmd',
-                                            ThrottleCmd, queue_size=1)
-        self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
-                                         BrakeCmd, queue_size=1)
+        self.steer_pub = rospy.Publisher('/vehicle/steering_cmd', SteeringCmd, queue_size=1)
+        self.throttle_pub = rospy.Publisher('/vehicle/throttle_cmd', ThrottleCmd, queue_size=1)
+        self.brake_pub = rospy.Publisher('/vehicle/brake_cmd', BrakeCmd, queue_size=1)
 
         # TODO: Create `TwistController` object
         # self.controller = TwistController(<Arguments you wish to provide>)
+        self.controller = Controller()
 
         # TODO: Subscribe to all the topics you need to
+
+        # /vehicle/dbw_enabled topic signals when the safety driver has taken control
+        self.dbw_enabled = False    # default to drive-by-wire not enabled - will pick this up from the topic...
+        rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
+
+        # /current_velocity topic gives the current speed of the vehicle
+        rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
+
+        # /twist_cmd topic is the output from the vehicles waypoint controller
+        # As implemented in waypoint_follower / pure_pursuit given code
+        rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cmd_cb)
 
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(50) # 50Hz
+        rate = rospy.Rate(10) # Was 50Hz
         while not rospy.is_shutdown():
             # TODO: Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
@@ -72,6 +81,28 @@ class DBWNode(object):
             #                                                     <any other argument you need>)
             # if <dbw is enabled>:
             #   self.publish(throttle, brake, steer)
+
+            # do we have some parameters from /twist_cmd and /current_velocity topics?
+            if hasattr(self, 'twist_cmd') and hasattr(self, 'current_velocity'):
+                # also need to check if DBW is enabled (PID will need to reset if driver took control)
+                if self.dbw_enabled:
+                    # DBW is enabled, so can get values from controller
+                    params = {
+                        'twist_cmd': self.twist_cmd,
+                        'current_velocity': self.current_velocity,
+                        'dbw_enabled': self.dbw_enabled
+                    }
+                    throttle, brake, steer = self.controller.control(**params)
+                    self.publish(throttle, brake, steer)
+
+            # demo values/code
+            #throttle, brake, steer = 1.,0.,0.
+            #self.publish(throttle, brake, steer)
+
+            # publishing some values here only if dbw enabled (not in manual mode)
+            #if self.dbw_enabled:
+            #self.publish(throttle,brake,steer)
+
             rate.sleep()
 
     def publish(self, throttle, brake, steer):
@@ -92,6 +123,17 @@ class DBWNode(object):
         bcmd.pedal_cmd = brake
         self.brake_pub.publish(bcmd)
 
+    def dbw_enabled_cb(self, msg):
+        # check if drive-by-wire is enabled (i.e. the car is not in manual mode)
+        self.dbw_enabled = msg.data
+
+    def current_velocity_cb(self, msg):
+        # store the current velocity TwistStamped message
+        self.current_velocity = msg
+
+    def twist_cmd_cb(self, msg):
+        # store the received TwistStamped message from the waypoint follower node on /twist_cmd topic
+        self.twist_cmd = msg
 
 if __name__ == '__main__':
     DBWNode()
