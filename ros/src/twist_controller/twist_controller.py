@@ -112,6 +112,9 @@ class Controller(object):
             # steering - yaw controller takes desired linear, desired angular, current linear as params
             steering = self.yaw_controller.get_steering(required_vel_linear, required_vel_angular, current_vel_linear)
 
+            # check that steering inputs aren't degrees - they're really not!
+            # steering = math.degrees(steering)
+
         else:
             # no last call time
             self.last_call_time = rospy.get_time()       # use ROS to get system time
