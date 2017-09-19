@@ -26,7 +26,7 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 ![carla-ros-graph-v2](imgs/carla-ros-graph-v2.png)
 
-## TODO: The Team
+## The Team
 
 __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor candidate at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
 
