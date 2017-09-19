@@ -1,2 +1,5 @@
 catkin_ws/
-.vscode/
+ros/build
+ros/devel
+*.pyc
+.vscode
