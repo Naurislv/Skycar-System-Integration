@@ -13,8 +13,8 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 1. Perception
     
-    * Traffic light detection
-    * Obstacle detection
+    * Traffic light detection -> __/topic__
+    * Obstacle detection -> __/topic__
 
 2. Planning
 
