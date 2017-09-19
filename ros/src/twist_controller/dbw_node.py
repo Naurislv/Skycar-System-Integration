@@ -74,13 +74,6 @@ class DBWNode(object):
         while not rospy.is_shutdown():
             # TODO: Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
-            # throttle, brake, steering = self.controller.control(<proposed linear velocity>,
-            #                                                     <proposed angular velocity>,
-            #                                                     <current linear velocity>,
-            #                                                     <dbw status>,
-            #                                                     <any other argument you need>)
-            # if <dbw is enabled>:
-            #   self.publish(throttle, brake, steer)
 
             # do we have some parameters from /twist_cmd and /current_velocity topics?
             if hasattr(self, 'twist_cmd') and hasattr(self, 'current_velocity'):
@@ -95,14 +88,6 @@ class DBWNode(object):
                     throttle, brake, steer = self.controller.control(**params)
                     #steer = -1.0 # test code
                     self.publish(throttle, brake, steer)
-
-            # demo values/code
-            #throttle, brake, steer = 1.,0.,0.
-            #self.publish(throttle, brake, steer)
-
-            # publishing some values here only if dbw enabled (not in manual mode)
-            #if self.dbw_enabled:
-            #self.publish(throttle,brake,steer)
 
             rate.sleep()
 
