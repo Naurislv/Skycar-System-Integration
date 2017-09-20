@@ -16,7 +16,8 @@ PID_THROTTLE_BRAKE_D = 0.07
 class Controller(object):
     def __init__(self, *args, **kwargs):
         # TODO: Implement
-        #pass
+        self.sampling_rate = kwargs["sampling_rate"]
+        self.delta_t = 1/self.sampling_rate
         rospy.loginfo('TwistController: Start init')
 
         # Initialise speed PID, with tuning parameters
@@ -63,62 +64,37 @@ class Controller(object):
         rospy.loginfo('TwistController: Complete init')
         rospy.loginfo('TwistController: Steer ratio = ' + str(steer_ratio))
 
-    def control(self, *args, **kwargs):
-        # TODO: Change the arg, kwarg list to suit your needs
-        # Return throttle, brake, steer
+    def control(self,required_vel_linear,
+                required_vel_angular,
+                current_vel_linear,
+                current_vel_angular,
+                dbw_enabled,
+                **kwargs):
+
         throttle, brake, steering = 0.0, 0.0, 0.0
 
-        rospy.loginfo('TwistController: Control call at ' + str(rospy.get_time()))
+        # uncomment for debugging pruposes otherwise we write logs at 50 Hz
+        #rospy.loginfo('TwistController: Control call at ' + str(rospy.get_time()))
+        #rospy.loginfo('TwistController: ' + 'Desired linear/angular = ' + str(required_vel_linear) + ","
+        #              + str(required_vel_angular) + ' Current = ' + str(current_vel_linear) + ',' + str(current_vel_angular))
 
-        dbw_enabled = kwargs['dbw_enabled']             # is DBW enabled (vs manual driving)
-
-        rospy.loginfo('TwistController: dbw_enabled = ' + str(dbw_enabled))
-
-        required_vel_linear = kwargs['twist_cmd'].twist.linear.x     # values requested by the twist command/follower
-        required_vel_angular = kwargs['twist_cmd'].twist.angular.z
-
-        current_vel_linear = kwargs['current_velocity'].twist.linear.x    # current values
-        current_vel_angular = kwargs['current_velocity'].twist.angular.z
-
-        rospy.loginfo('TwistController: ' + 'Desired linear/angular = ' + str(required_vel_linear) + ","
-                      + str(required_vel_angular) + ' Current = ' + str(current_vel_linear) + ',' + str(current_vel_angular))
-
-        # task is to figure out which throttle/brake/steer to apply to move car towards requested linear/angular
-
-        if dbw_enabled is False:
-            # manual driving, so reset the PIDs (zero the integral count) for next time
-            self.pid_throttle_brake.reset()
-
-        if self.last_call_time is not None:
-            # have a time stamp for the last call, so can calculate sample time since last input
-            time_now = rospy.get_time()
-            sample_time = time_now - self.last_call_time
-            self.last_call_time = time_now
-
-            #rospy.loginfo('TwistController: Current time = ' + str(sample_time))
-
-            # calculate the difference (error) between desired and current linear velocity
-            velocity_error = required_vel_linear - current_vel_linear
-            pid_value = self.pid_throttle_brake.step(velocity_error, sample_time)
-            if pid_value > 0:
-                throttle = pid_value
-                brake = 0.0
-            else:
-                throttle = 0.0
-                if abs(pid_value) > self.brake_deadband:
-                    # don't bother braking unless over the deadband level
-                    brake = abs(pid_value) * self.brake_torque_const
-
-            # steering - yaw controller takes desired linear, desired angular, current linear as params
-            steering = self.yaw_controller.get_steering(required_vel_linear, required_vel_angular, current_vel_linear)
-
-            # check that steering inputs aren't degrees - they're really not!
-            # steering = math.degrees(steering)
-
+        # calculate the difference (error) between desired and current linear velocity
+        velocity_error = required_vel_linear - current_vel_linear
+        pid_value = self.pid_throttle_brake.step(velocity_error, self.delta_t)
+        if pid_value > 0:
+            throttle = pid_value
+            brake = 0.0
         else:
-            # no last call time
-            self.last_call_time = rospy.get_time()       # use ROS to get system time
-            throttle, brake, steering = 0.0, 0.0, 0.0                    # no inputs to the car systems yet...
+            throttle = 0.0
+            if abs(pid_value) > self.brake_deadband:
+                # don't bother braking unless over the deadband level
+                brake = abs(pid_value) * self.brake_torque_const
+
+        # steering - yaw controller takes desired linear, desired angular, current linear as params
+        steering = self.yaw_controller.get_steering(required_vel_linear, required_vel_angular, current_vel_linear)
+
+        # check that steering inputs aren't degrees - they're really not!
+        # steering = math.degrees(steering)
 
         if throttle <> 0.0:
             rospy.loginfo('TwistController: Accelerating = ' + str(throttle))
@@ -129,4 +105,5 @@ class Controller(object):
 
         return throttle, brake, steering
 
-        #return 0.5, brake, 0.5
+    def reset(self):
+        self.pid_throttle_brake.reset()
