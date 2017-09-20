@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+"""DBW Node - node to supply control parameters to car"""
 import rospy
 from std_msgs.msg import Bool
 from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
@@ -50,11 +50,11 @@ class DBWNode(object):
         self.throttle_pub = rospy.Publisher('/vehicle/throttle_cmd', ThrottleCmd, queue_size=1)
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd', BrakeCmd, queue_size=1)
 
-        # TODO: Create `TwistController` object
+        # Create `TwistController` object
         # self.controller = TwistController(<Arguments you wish to provide>)
         self.controller = Controller()
 
-        # TODO: Subscribe to all the topics you need to
+        # Subscribe to all the topics you need to
 
         # /vehicle/dbw_enabled topic signals when the safety driver has taken control
         self.dbw_enabled = False    # default to drive-by-wire not enabled - will pick this up from the topic...
@@ -70,9 +70,10 @@ class DBWNode(object):
         self.loop()
 
     def loop(self):
+        """Main loop"""
         rate = rospy.Rate(50) # Was 50Hz
         while not rospy.is_shutdown():
-            # TODO: Get predicted throttle, brake, and steering using `twist_controller`
+            # Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
 
             # do we have some parameters from /twist_cmd and /current_velocity topics?
