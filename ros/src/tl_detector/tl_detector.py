@@ -10,8 +10,13 @@ from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+import math
 
 STATE_COUNT_THRESHOLD = 3
+
+USE_GROUND_TRUTH = True         # Use the ground truth traffic light data on /vehicle/traffic_lights
+                                # This is to allow a build of the final waypoint controllers before
+                                #   the traffic light classification has been developed
 
 class TLDetector(object):
     def __init__(self):
@@ -49,6 +54,8 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
+        self.best_waypoint = 0
+
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -70,7 +77,11 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+
+        if USE_GROUND_TRUTH:
+            light_wp, state = self.process_ground_truth_lights()
+        else:
+            light_wp, state = self.process_traffic_lights()
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -100,9 +111,24 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        #TODO implement
-        return 0
+        def distance(pt1, pt2):
+            """Calculates dinstace from one point to another in 2D"""
+            delta_x = pt1.x - pt2.x
+            delta_y = pt1.y - pt2.y
+            return math.sqrt(delta_x*delta_x + delta_y*delta_y)
 
+        best_waypoint = self.best_waypoint
+        if self.waypoints is not None:
+            waypoints = self.waypoints.waypoints
+            min_dist = distance(pose.position, waypoints[0].pose.pose.position)
+            for i, point in enumerate(waypoints):
+                dist = distance(pose.position, point.pose.pose.position)
+                if dist < min_dist:
+                    best_waypoint = i
+                    min_dist = dist
+            self.best_waypoint = best_waypoint
+
+        return best_waypoint
 
     def project_to_image_plane(self, point_in_world):
         """Project point from 3D world coordinates to 2D camera image location
@@ -185,6 +211,47 @@ class TLDetector(object):
             return light_wp, state
         self.waypoints = None
         return -1, TrafficLight.UNKNOWN
+
+    def process_ground_truth_lights(self):
+        """
+        Finds the closest traffic light in the list of ground truth lights,
+        then returns the state for that light.
+
+        Returns:
+            int: index of waypoint closes to the upcoming traffic light (-1 if none exists)
+            int: ID of traffic light color (specified in styx_msgs/TrafficLight)
+
+        """
+        light = None
+        light_positions = self.config['light_positions']
+        if(self.pose):
+            car_position = self.get_closest_waypoint(self.pose.pose)
+            #rospy.loginfo("[test] self.pose.pose: %s", self.pose.pose)
+            rospy.loginfo("[test] car_position: %s", car_position)
+
+        next_traffic_light_waypoint = -1
+        next_traffic_light_state = TrafficLight.UNKNOWN
+        if car_position:
+            # Have a car position, now need the nearest light
+            #rospy.loginfo("[test] lights array length: " + str(len(self.lights)))
+            #rospy.loginfo("[test] first light state : " + str(self.lights[0].state))
+            #rospy.loginfo("[test] first light pose  : " + str(self.lights[0].pose.pose))
+            #rospy.loginfo("[test] first light pose.x  : " + str(self.lights[0].pose.pose.position.x))
+            #rospy.loginfo("[test] first light pose.y  : " + str(self.lights[0].pose.pose.position.y))
+            #pass
+            # loop over the lights
+
+            for l in self.lights:
+                waypoint_nearest_light = self.get_closest_waypoint(l.pose.pose)
+                #rospy.loginfo("[test] light waypoint: %s", waypoint_nearest_light)
+                if waypoint_nearest_light > car_position:
+                    next_traffic_light_waypoint = waypoint_nearest_light
+                    next_traffic_light_state = l.state
+                    rospy.loginfo("[test] next light waypoint is %s, in state = " + str(l.state),
+                                  next_traffic_light_waypoint)
+                    break
+
+        return next_traffic_light_waypoint, next_traffic_light_state
 
 if __name__ == '__main__':
     try:
