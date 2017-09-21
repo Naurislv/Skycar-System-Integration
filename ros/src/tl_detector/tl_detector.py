@@ -227,7 +227,7 @@ class TLDetector(object):
         if(self.pose):
             car_position = self.get_closest_waypoint(self.pose.pose)
             #rospy.loginfo("[test] self.pose.pose: %s", self.pose.pose)
-            rospy.loginfo("[test] car_position: %s", car_position)
+            #rospy.loginfo("[test] car_position: %s", car_position)
 
         next_traffic_light_waypoint = -1
         next_traffic_light_state = TrafficLight.UNKNOWN
@@ -247,8 +247,8 @@ class TLDetector(object):
                 if waypoint_nearest_light > car_position:
                     next_traffic_light_waypoint = waypoint_nearest_light
                     next_traffic_light_state = l.state
-                    rospy.loginfo("[test] next light waypoint is %s, in state = " + str(l.state),
-                                  next_traffic_light_waypoint)
+                    #rospy.loginfo("[test] next light waypoint is %s, in state = " + str(l.state),
+                    #              next_traffic_light_waypoint)
                     break
 
         return next_traffic_light_waypoint, next_traffic_light_state
