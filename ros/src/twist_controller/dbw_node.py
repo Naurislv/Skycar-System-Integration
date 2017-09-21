@@ -38,7 +38,6 @@ class DBWNode(object):
         self.required_vel_linear = None
         self.required_vel_angular = None
         self.current_vel_linear = None
-        self.current_vel_angular = None
 
         # default to drive-by-wire not enabled - will pick this up from the topic...
         self.dbw_enabled = False
@@ -80,8 +79,7 @@ class DBWNode(object):
             throttle, brake, steer = self.controller.control(
                 self.required_vel_linear,
                 self.required_vel_angular,
-                self.current_vel_linear,
-                self.current_vel_angular)
+                self.current_vel_linear)
 
             self.publish(throttle, brake, steer)
 
@@ -116,7 +114,6 @@ class DBWNode(object):
     def current_velocity_cb(self, msg):
         # store the current velocity TwistStamped message
         self.current_vel_linear = msg.twist.linear.x
-        self.current_vel_angular = msg.twist.angular.z
 
     def twist_cmd_cb(self, msg):
         # store the received TwistStamped message from the waypoint follower node

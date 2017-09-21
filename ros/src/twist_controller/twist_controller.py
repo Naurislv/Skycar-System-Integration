@@ -2,16 +2,23 @@
 import rospy                                    # will need access to parameters and system time
 from pid import PID                             # PID controller provided
 from yaw_controller import YawController        # Yaw controller provided
-
+from lowpass import LowPassFilter
 
 # original Udacity constants
 GAS_DENSITY = 2.858
 ONE_MPH = 0.44704
 
 # Tuning parameters for throttle/brake PID controller
-PID_THROTTLE_BRAKE_P = 0.9
-PID_THROTTLE_BRAKE_I = 0.0005
-PID_THROTTLE_BRAKE_D = 0.07
+PID_VEL_P = 0.9
+PID_VEL_I = 0.0005
+PID_VEL_D = 0.07
+
+#
+PID_ACC_P = 0.4
+PID_ACC_I = 0.05
+PID_ACC_D = 0.0
+
+LPF_ACCEL_TAU = 0.2
 
 class Controller(object):
     def __init__(self, *args, **kwargs):
@@ -36,14 +43,20 @@ class Controller(object):
         self.brake_torque_const = (self.vehicle_mass + self.fuel_capacity \
             * GAS_DENSITY) * self.wheel_radius
 
+        self.past_vel_linear = 0.0
+        self.current_accel = 0.0
+        self.low_pass_filter_accel = LowPassFilter(LPF_ACCEL_TAU, self.delta_t)
+
+
 
         # Initialise speed PID, with tuning parameters
         # Will use this PID for the speed control
-        self.pid_throttle_brake = PID(PID_THROTTLE_BRAKE_P,
-                                      PID_THROTTLE_BRAKE_I,
-                                      PID_THROTTLE_BRAKE_D,
-                                      self.decel_limit,
-                                      self.accel_limit)
+        self.pid_vel_linear = PID(PID_VEL_P, PID_VEL_I, PID_VEL_D,
+                                  self.decel_limit, self.accel_limit)
+
+        # second controller to get throttle signal between 0 and 1
+        self.accel_pid = PID(PID_ACC_P, PID_ACC_I, PID_ACC_D, 0.0, 1.0)
+
 
         # Initialise Yaw controller - this gives steering values using
         # vehicle attributes/bicycle model
@@ -57,11 +70,8 @@ class Controller(object):
         rospy.loginfo('TwistController: Complete init')
         rospy.loginfo('TwistController: Steer ratio = ' + str(self.steer_ratio))
 
-    def control(self, required_vel_linear,
-                required_vel_angular,
-                current_vel_linear,
-                current_vel_angular,
-                **kwargs):
+    def control(self, required_vel_linear,required_vel_angular,
+                current_vel_linear):
 
         throttle, brake, steering = 0.0, 0.0, 0.0
 
@@ -72,23 +82,33 @@ class Controller(object):
 
         # calculate the difference (error) between desired and current linear velocity
         velocity_error = required_vel_linear - current_vel_linear
-        pid_value = self.pid_throttle_brake.step(velocity_error, self.delta_t)
-        if pid_value > 0:
-            throttle = pid_value
+
+        # calculate current acceleration and smooth using lpf
+        accel_temp = self.sampling_rate * (self.past_vel_linear - current_vel_linear)
+        # update
+        self.past_vel_linear = current_vel_linear
+        self.low_pass_filter_accel.filt(accel_temp)
+        self.current_accel = self.low_pass_filter_accel.get()
+
+        # use velocity controller compute desired accelaration
+        desired_accel = self.pid_vel_linear.step(velocity_error, self.delta_t)
+
+        # TODO think about emergency brake command
+        if desired_accel > 0.0:
+            throttle = self.accel_pid.step(desired_accel - self.current_accel, self.delta_t)
             brake = 0.0
         else:
             throttle = 0.0
-            if abs(pid_value) > self.brake_deadband:
+            # reset just to be sure
+            self.accel_pid.reset()
+            if abs(desired_accel) > self.brake_deadband:
                 # don't bother braking unless over the deadband level
-                brake = abs(pid_value) * self.brake_torque_const
+                brake = abs(desired_accel) * self.brake_torque_const
 
         # steering - yaw controller takes desired linear, desired angular, current linear as params
         steering = self.yaw_controller.get_steering(required_vel_linear,
                                                     required_vel_angular,
                                                     current_vel_linear)
-
-        # check that steering inputs aren't degrees - they're really not!
-        # steering = math.degrees(steering)
 
         # uncomment for debugging
         #if throttle <> 0.0:
@@ -101,4 +121,4 @@ class Controller(object):
         return throttle, brake, steering
 
     def reset(self):
-        self.pid_throttle_brake.reset()
+        self.pid_vel_linear.reset()
