@@ -83,6 +83,8 @@ class TLDetector(object):
         final submission.
         """
         self.lights = msg.lights
+        rospy.loginfo("[test] self.lights: %s", self.lights)
+        self.traffic_light_sub.unregister()
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -247,9 +249,7 @@ class TLDetector(object):
             # Cropped for Vladimir's trained simulaotr images
             crop = cv2.resize(cv_image, (300, 200), interpolation=cv2.INTER_CUBIC)
 
-            if self.counter % 10 == 0:
-                cv2.imwrite('/home/nauris/Downloads/TestIms/{}.png'.format(self.counter), crop)
-            self.counter +=1
+            self._collect_ground_truth(crop, self.lights)
 
             # self.deb_img.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
             # rosrun image_view image_view image:=/deb_img
@@ -313,6 +313,12 @@ class TLDetector(object):
             return light_wp, state
         # self.waypoints = None
         return -1, TrafficLight.UNKNOWN
+
+    def _collect_ground_truth(self, img, positions):
+        # self.lights
+        
+        # cv2.imwrite('/home/nauris/Downloads/TestIms/{}.png'.format(self.counter), crop)
+        self.counter +=1
 
 if __name__ == '__main__':
     try:
