@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from std_msgs.msg import Int32, Bool
 
 import math
 
@@ -22,6 +23,8 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+
+STOP_DISTANCE = 100 # Distance to traffic lights within which we may stop the car
 
 def get_closest_waypoint(pose_x, pose_y, waypoints):
 
@@ -53,12 +56,15 @@ class WaypointUpdater(object):
         self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-
+        self.traffic_waypoint_sub = rospy.Subscriber('/traffic_waypoint', Int32 ,self.traffic_cb)
+        self.dbw_enabled_sub = rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
         # Format of self.var = init_value - declare and initialise
+        self.closest_waypoint = -1
+        self.dbw_enabled = False
 
         # Will need a list of waypoints
         self.waypoints = []
@@ -73,7 +79,7 @@ class WaypointUpdater(object):
         pose_x = msg.pose.position.x
         pose_y = msg.pose.position.y
         # find the closest waypoint
-        closest_waypoint = get_closest_waypoint(pose_x, pose_y, self.waypoints)
+        self.closest_waypoint = get_closest_waypoint(pose_x, pose_y, self.waypoints)
 
         # get waypoints ahead of the car
         # this currently sends as many as are available
@@ -83,7 +89,7 @@ class WaypointUpdater(object):
         if n_waypoints > LOOKAHEAD_WPS:
             n_waypoints = LOOKAHEAD_WPS                 # max waypoints to pass over
         for i in range(n_waypoints):
-            waypoints_ahead.append(self.waypoints[closest_waypoint+i])
+            waypoints_ahead.append(self.waypoints[self.closest_waypoint+i])
 
         # structure the data to match the expected styx_msgs/Lane form
         lane = Lane()
@@ -109,7 +115,44 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        pass
+
+        # Test code - echo out the traffic light waypoint if it is non-zero
+        #if msg > 0:
+        #    rospy.loginfo("[test] traffic_cb next red light waypoint #%s", msg)
+
+        next_red_light = msg.data       # get the waypoint ref of the next red light (-1 if none)
+
+        if (self.closest_waypoint > 0) and (self.dbw_enabled):   # skip if no position or manual driving
+
+            # get the nearest waypoint velocity
+            start_point_velocity = self.get_waypoint_velocity(self.waypoints[self.closest_waypoint])
+
+            if next_red_light > 0:
+                #rospy.loginfo("[test] traffic_cb next red light waypoint: %s", next_red_light)
+                # now check if the red light is close enough that we need to worry about it...
+                # self.closest_waypoint will have the current car position (updated in pose_cb)
+                distance_to_red = self.distance(self.waypoints, self.closest_waypoint, next_red_light)
+                #rospy.loginfo("[test] distance to red light: %s", distance_to_red)
+                #rospy.loginfo("[test] current waypoint velocity = " + str(start_point_velocity))
+                if distance_to_red < STOP_DISTANCE:
+                    rospy.loginfo("[test] stopping...")
+                    # smoothly stop over the waypoints up to next_red_light waypoint
+                    for i in range(self.closest_waypoint, next_red_light + 1):
+                        # get the distance to the i-th way point
+                        i_point_distance = self.distance(self.waypoints, self.closest_waypoint, i)
+                        #rospy.loginfo("[test] distance to point " + str(i) + " = " + str(i_point_distance))
+                        i_point_target_velocity = (i_point_distance / distance_to_red) * start_point_velocity * -1
+                        i_point_target_velocity += start_point_velocity
+                        if i_point_target_velocity > 0:
+                            self.set_waypoint_velocity(self.waypoints, i, i_point_target_velocity)
+                            #rospy.loginfo("[test] set waypoint " + str( i) + " v= " + str(i_point_target_velocity))
+                        else:
+                            rospy.loginfo("[test] error - negative velocity... v=" + str(i_point_target_velocity))
+            else:
+                rospy.loginfo("[test] traffic_cb next light is green: %s", next_red_light)
+                # don't want to stop, but do want to make sure we keep going...
+
+        #pass
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
@@ -129,6 +172,9 @@ class WaypointUpdater(object):
             wp1 = i
         return dist
 
+    def dbw_enabled_cb(self, msg):
+        # check if drive-by-wire is enabled (i.e. the car is not in manual mode)
+        self.dbw_enabled = msg.data
 
 if __name__ == '__main__':
     try:

@@ -222,34 +222,33 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        light = None
-        light_positions = self.config['light_positions']
+        #light = None
+        #light_positions = self.config['light_positions']
+        next_traffic_light_waypoint = -1
+        next_traffic_light_state = TrafficLight.UNKNOWN
         if(self.pose):
             car_position = self.get_closest_waypoint(self.pose.pose)
             #rospy.loginfo("[test] self.pose.pose: %s", self.pose.pose)
             #rospy.loginfo("[test] car_position: %s", car_position)
+            if car_position:
+                # Have a car position, now need the nearest light
+                #rospy.loginfo("[test] lights array length: " + str(len(self.lights)))
+                #rospy.loginfo("[test] first light state : " + str(self.lights[0].state))
+                #rospy.loginfo("[test] first light pose  : " + str(self.lights[0].pose.pose))
+                #rospy.loginfo("[test] first light pose.x  : " + str(self.lights[0].pose.pose.position.x))
+                #rospy.loginfo("[test] first light pose.y  : " + str(self.lights[0].pose.pose.position.y))
+                #pass
+                # loop over the lights
 
-        next_traffic_light_waypoint = -1
-        next_traffic_light_state = TrafficLight.UNKNOWN
-        if car_position:
-            # Have a car position, now need the nearest light
-            #rospy.loginfo("[test] lights array length: " + str(len(self.lights)))
-            #rospy.loginfo("[test] first light state : " + str(self.lights[0].state))
-            #rospy.loginfo("[test] first light pose  : " + str(self.lights[0].pose.pose))
-            #rospy.loginfo("[test] first light pose.x  : " + str(self.lights[0].pose.pose.position.x))
-            #rospy.loginfo("[test] first light pose.y  : " + str(self.lights[0].pose.pose.position.y))
-            #pass
-            # loop over the lights
-
-            for l in self.lights:
-                waypoint_nearest_light = self.get_closest_waypoint(l.pose.pose)
-                #rospy.loginfo("[test] light waypoint: %s", waypoint_nearest_light)
-                if waypoint_nearest_light > car_position:
-                    next_traffic_light_waypoint = waypoint_nearest_light
-                    next_traffic_light_state = l.state
-                    #rospy.loginfo("[test] next light waypoint is %s, in state = " + str(l.state),
-                    #              next_traffic_light_waypoint)
-                    break
+                for l in self.lights:
+                    waypoint_nearest_light = self.get_closest_waypoint(l.pose.pose)
+                    #rospy.loginfo("[test] light waypoint: %s", waypoint_nearest_light)
+                    if waypoint_nearest_light > car_position:
+                        next_traffic_light_waypoint = waypoint_nearest_light
+                        next_traffic_light_state = l.state
+                        #rospy.loginfo("[test] next light waypoint is %s, in state = " + str(l.state),
+                        #              next_traffic_light_waypoint)
+                        break
 
         return next_traffic_light_waypoint, next_traffic_light_state
 
