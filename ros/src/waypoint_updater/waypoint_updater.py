@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from styx_msgs.msg import Lane, Waypoint
 from std_msgs.msg import Int32, Bool
 
@@ -24,7 +24,11 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 
-STOP_DISTANCE = 100 # Distance to traffic lights within which we may stop the car
+STOP_DISTANCE = 100     # Distance to traffic lights within which we may stop the car
+STOP_LINE_OFFSET = 10   # Distance back from lights to actually stop the car
+
+REFERENCE_VELOCITY = 11.0   # Reference velocity when restarting the car
+REFERENCE_DISTANCE = 30     # Distance to get back up to reference velocity
 
 def get_closest_waypoint(pose_x, pose_y, waypoints):
 
@@ -58,6 +62,7 @@ class WaypointUpdater(object):
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
         self.traffic_waypoint_sub = rospy.Subscriber('/traffic_waypoint', Int32 ,self.traffic_cb)
         self.dbw_enabled_sub = rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
+        self.current_velocity = rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
@@ -65,6 +70,7 @@ class WaypointUpdater(object):
         # Format of self.var = init_value - declare and initialise
         self.closest_waypoint = -1
         self.dbw_enabled = False
+        self.current_velocity = 0.0
 
         # Will need a list of waypoints
         self.waypoints = []
@@ -141,16 +147,36 @@ class WaypointUpdater(object):
                         # get the distance to the i-th way point
                         i_point_distance = self.distance(self.waypoints, self.closest_waypoint, i)
                         #rospy.loginfo("[test] distance to point " + str(i) + " = " + str(i_point_distance))
-                        i_point_target_velocity = (i_point_distance / distance_to_red) * start_point_velocity * -1
-                        i_point_target_velocity += start_point_velocity
-                        if i_point_target_velocity > 0:
-                            self.set_waypoint_velocity(self.waypoints, i, i_point_target_velocity)
-                            #rospy.loginfo("[test] set waypoint " + str( i) + " v= " + str(i_point_target_velocity))
+                        if (distance_to_red - STOP_LINE_OFFSET) > 0:
+                            i_point_target_velocity = (i_point_distance / (distance_to_red - STOP_LINE_OFFSET )) * start_point_velocity * -1
+                            i_point_target_velocity += start_point_velocity
+                            if i_point_target_velocity < 0.0:
+                                #rospy.loginfo("[test] error - negative velocity... v=" + str(i_point_target_velocity))
+                                pass
                         else:
-                            rospy.loginfo("[test] error - negative velocity... v=" + str(i_point_target_velocity))
+                            i_point_target_velocity = 0.0
+                        self.set_waypoint_velocity(self.waypoints, i, i_point_target_velocity)
+
             else:
-                rospy.loginfo("[test] traffic_cb next light is green: %s", next_red_light)
+                rospy.loginfo("[test] traffic_cb next light is green, current velocity: %s", self.current_velocity)
                 # don't want to stop, but do want to make sure we keep going...
+                if start_point_velocity < REFERENCE_VELOCITY:
+                    # speed up again
+                    rospy.loginfo("[test] speeding up again...")
+                    #rospy.loginfo("[test] closest waypoint: %s", self.closest_waypoint)
+                    # smooth acceleration over the planned distance
+                    for i in range(self.closest_waypoint, self.closest_waypoint + LOOKAHEAD_WPS):
+                        #rospy.loginfo("[test] updating waypoint: %s ", i)
+                        i_point_distance = self.distance(self.waypoints, self.closest_waypoint, i)
+                        if i_point_distance < REFERENCE_DISTANCE:
+                            i_point_target_velocity = REFERENCE_VELOCITY * (REFERENCE_DISTANCE - i_point_distance)
+                            i_point_target_velocity = i_point_target_velocity / REFERENCE_DISTANCE
+                            self.set_waypoint_velocity(self.waypoints, i, i_point_target_velocity)
+                            #rospy.loginfo("[test] updating waypoint: " +str(i) + " to velocity " +str(i_point_target_velocity))
+                        else:
+                            #self.set_waypoint_velocity(self.waypoints, i, REFERENCE_VELOCITY)
+                            #rospy.loginfo("[test] defaulting waypoint: " + str(i) + " to reference velocity")
+                            break
 
         #pass
 
@@ -175,6 +201,10 @@ class WaypointUpdater(object):
     def dbw_enabled_cb(self, msg):
         # check if drive-by-wire is enabled (i.e. the car is not in manual mode)
         self.dbw_enabled = msg.data
+
+    def current_velocity_cb(self, msg):
+        # store the current velocity TwistStamped message
+        self.current_velocity = msg.twist.linear.x
 
 if __name__ == '__main__':
     try:
