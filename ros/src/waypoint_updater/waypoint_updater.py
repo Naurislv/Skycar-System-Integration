@@ -216,9 +216,7 @@ class WaypointUpdater(object):
                             i_point_target_velocity *= (start_point_velocity * -1)
                             i_point_target_velocity += start_point_velocity
                         else:
-                            i_point_target_velocity = 0.0
-                        if i_point_target_velocity < 0.0:
-                            i_point_target_velocity = 0.0  # don't go negative
+                            i_point_target_velocity = -10.0     # negative stops car 'creep' when stopped
                         self.set_waypoint_velocity(self.waypoints, i, i_point_target_velocity)
                 else:
                     # just set the following waypoints to reference velocity
