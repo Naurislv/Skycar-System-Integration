@@ -18,8 +18,15 @@ from light_classification.tl_classifier import TLClassifier
 from styx_msgs.msg import TrafficLightArray, TrafficLight # pylint: disable=E0401
 from styx_msgs.msg import Lane # pylint: disable=E0401
 import tf
+import cv2
+import yaml
+import math
 
 STATE_COUNT_THRESHOLD = 3
+
+USE_GROUND_TRUTH = True         # Use the ground truth traffic light data on /vehicle/traffic_lights
+                                # This is to allow a build of the final waypoint controllers before
+                                #   the traffic light classification has been developed
 
 class TLDetector(object):
     """Traffic Light detection and classifaction. Results publishing to ROS nodes."""
@@ -96,7 +103,11 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+
+        if USE_GROUND_TRUTH:
+            light_wp, state = self.process_ground_truth_lights()
+        else:
+            light_wp, state = self.process_traffic_lights()
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -249,7 +260,7 @@ class TLDetector(object):
             # Cropped for Vladimir's trained simulaotr images
             crop = cv2.resize(cv_image, (300, 200), interpolation=cv2.INTER_CUBIC)
 
-            self._collect_ground_truth(crop, self.lights)
+            # self._collect_ground_truth(crop, self.lights)
 
             # self.deb_img.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
             # rosrun image_view image_view image:=/deb_img
@@ -314,11 +325,39 @@ class TLDetector(object):
         # self.waypoints = None
         return -1, TrafficLight.UNKNOWN
 
-    def _collect_ground_truth(self, img, positions):
-        # self.lights
-        
-        # cv2.imwrite('/home/nauris/Downloads/TestIms/{}.png'.format(self.counter), crop)
-        self.counter +=1
+    def process_ground_truth_lights(self):
+        """
+        Finds the closest traffic light in the list of ground truth lights,
+        then returns the state for that light.
+
+        Returns:
+            int: index of waypoint closes to the upcoming traffic light (-1 if none exists)
+            int: ID of traffic light color (specified in styx_msgs/TrafficLight)
+
+        """
+        #light = None
+        #light_positions = self.config['light_positions']
+        next_traffic_light_waypoint = -1
+        next_traffic_light_state = TrafficLight.UNKNOWN
+        if self.pose:
+
+            car_position = self.get_closest_waypoint(self.pose.pose.position.x,
+                                                     self.pose.pose.position.y,
+                                                     self.waypoints)
+            if car_position:
+
+                for _light in self.lights:
+                    waypoint_nearest_light = self.get_closest_waypoint(_light.pose.pose.position.x,
+                                                                       _light.pose.pose.position.y,
+                                                                       self.waypoints)
+
+                    #rospy.loginfo("[test] light waypoint: %s", waypoint_nearest_light)
+                    if waypoint_nearest_light > car_position:
+                        next_traffic_light_waypoint = waypoint_nearest_light
+                        next_traffic_light_state = _light.state
+                        break
+
+        return next_traffic_light_waypoint, next_traffic_light_state
 
 if __name__ == '__main__':
     try:
