@@ -32,16 +32,18 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 
-STOP_DISTANCE = 100     # Distance to traffic lights within which we may stop the car
+#STOP_DISTANCE = 50 #100     # Distance to traffic lights within which we may stop the car
 STOP_LINE_OFFSET = 28.5 # Distance back from lights to actually stop the car
-MIN_STOP_DISTANCE = 30  # If within this distance, don't stop (already in intersection)
+MIN_STOP_DISTANCE = 28.5 #30  # If within this distance, don't stop (already in intersection)
 
-REFERENCE_VELOCITY = 11.0   # Reference velocity when restarting the car
-REFERENCE_DISTANCE = 30     # Distance to get back up to reference velocity
+REFERENCE_VELOCITY = 11.0   #4.47   #11.0   # Reference velocity when restarting the car
+                            # 4.47m/s = 10mph
+                            # 11.0m/s = ~25mph
+#REFERENCE_DISTANCE = 30     # Distance to get back up to reference velocity
 
-COMFORTABLE_DECEL = 1.0     # A comfortable rate to decelerate
-MAXIMUM_DECEL = 5.0         # Maximum rate to decelerate
-MIN_EMERGENCY_VELOCITY = 1.5    # Min speed, over which will keep going at late red light
+COMFORTABLE_DECEL = 2.0     # A comfortable rate to decelerate
+MAXIMUM_DECEL = 10.0         # Maximum rate to decelerate
+MIN_EMERGENCY_VELOCITY = 5  # 1.5    # Min speed, over which will keep going at late red light
 
 # Control states
 CONTROL_STATE_UNKNOWN = -1
@@ -186,9 +188,13 @@ class WaypointUpdater(object):
                                 rospy.loginfo("[test] Changing to *STOPPING* state")
                             self.control_state = CONTROL_STATE_STOPPING
                     else:
-                        if self.control_state != CONTROL_STATE_DRIVING:
-                            rospy.loginfo("[test] Changing to *DRIVING* state")
-                        self.control_state = CONTROL_STATE_DRIVING
+                        if self.control_state == CONTROL_STATE_STOPPING:
+                            # we are already stopping, stay in this state if the light is still red
+                            rospy.loginfo("[test] Holding *STOPPING* state")
+                        else:
+                            if self.control_state != CONTROL_STATE_DRIVING:
+                                rospy.loginfo("[test] Changing to *DRIVING* state")
+                            self.control_state = CONTROL_STATE_DRIVING
                 else:
                     # no red light
                     if self.control_state != CONTROL_STATE_DRIVING:
