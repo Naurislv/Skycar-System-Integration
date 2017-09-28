@@ -174,7 +174,7 @@ class TLDetector(object):
 
         """
         light = None
-        light_positions = self.config['light_positions']
+        #light_positions = self.config['light_positions']
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
 
