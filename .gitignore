@@ -1,5 +1,6 @@
-catkin_ws/
-ros/build
-ros/devel
-*.pyc
-.vscode
+*.py[cod]
+
+build
+devel
+
+profile.tmp

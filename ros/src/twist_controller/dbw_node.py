@@ -82,7 +82,6 @@ class DBWNode(object):
                 self.current_vel_linear)
 
             self.publish(throttle, brake, steer)
-
             rate.sleep()
 
     def publish(self, throttle, brake, steer):
