@@ -3,3 +3,5 @@ ros/build
 ros/devel
 *.pyc
 .vscode
+
+object_detection/
