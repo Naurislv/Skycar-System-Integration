@@ -39,6 +39,7 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
 
+<<<<<<< HEAD
         _ = rospy.Subscriber('/current_pose', PoseStamped, callback=self.pose_cb)
         self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane,
                                                    callback=self.waypoints_cb)
@@ -47,6 +48,20 @@ class TLDetector(object):
         # provides an image stream from the car's camera. These images are used to determine the
         # color of upcoming traffic lights.
         _ = rospy.Subscriber('/image_color', Image, self.image_cb)
+=======
+        sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+        sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+
+        '''
+        /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
+        helps you acquire an accurate ground truth data source for the traffic light
+        classifier by sending the current color state of all traffic lights in the
+        simulator. When testing on the vehicle, the color state will not be available. You'll need to
+        rely on the position of the light and the camera image to predict it.
+        '''
+        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
+>>>>>>> 9de6331b9e6e84bad9219eb851532fdd7c6be086
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -95,8 +110,7 @@ class TLDetector(object):
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
-            of the waypoint closest to the red light to /traffic_waypoint
-
+            of the waypoint closest to the red light's stop line to /traffic_waypoint
         Args:
             msg (Image): image from car-mounted camera
 
@@ -272,11 +286,26 @@ class TLDetector(object):
            location and color.all
 
         Returns:
+<<<<<<< HEAD
             int: index of waypoint closest to the upcoming traffic light (-1 if none exists)
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
         light_positions = self.config['light_positions']
+=======
+            int: index of waypoint closes to the upcoming stop line for a traffic light (-1 if none exists)
+
+            int: ID of traffic light color (specified in styx_msgs/TrafficLight)
+
+        """
+        light = None
+        #light_positions = self.config['light_positions']
+        # List of positions that correspond to the line to stop in front of for a given intersection
+        stop_line_positions = self.config['stop_line_positions']
+
+        if(self.pose):
+            car_position = self.get_closest_waypoint(self.pose.pose)
+>>>>>>> 9de6331b9e6e84bad9219eb851532fdd7c6be086
 
         light = None
         car_position = None

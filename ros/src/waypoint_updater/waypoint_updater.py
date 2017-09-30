@@ -77,7 +77,6 @@ def get_closest_waypoint(pose_x, pose_y, waypoints):
     # return closest point found
     return closest_point
 
-
 class WaypointUpdater(object):
     """
     Waypoint updater class

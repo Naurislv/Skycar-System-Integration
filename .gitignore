@@ -1,7 +1,11 @@
+*.py[cod]
+
+build
+devel
+
+profile.tmp
+
 catkin_ws/
-ros/build
-ros/devel
-*.pyc
 .vscode
 
 object_detection/
