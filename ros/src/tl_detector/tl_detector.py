@@ -18,7 +18,6 @@ from light_classification.tl_classifier import TLClassifier
 from styx_msgs.msg import TrafficLightArray, TrafficLight # pylint: disable=E0401
 from styx_msgs.msg import Lane # pylint: disable=E0401
 import tf
-import cv2
 import yaml
 import math
 
@@ -39,6 +38,9 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
 
+        # Load classifier before starting substribers because it takes some time
+        self.light_classifier = TLClassifier()
+
         _ = rospy.Subscriber('/current_pose', PoseStamped, callback=self.pose_cb)
         self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane,
                                                    callback=self.waypoints_cb)
@@ -54,7 +56,7 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -66,6 +68,11 @@ class TLDetector(object):
         self.prev_light_loc = None
 
         self.counter = 0
+
+        rospy.loginfo('Red: %s', TrafficLight.RED)
+        rospy.loginfo('Yellow: %s', TrafficLight.YELLOW)
+        rospy.loginfo('Green: %s', TrafficLight.GREEN)
+        rospy.loginfo('Unknown: %s', TrafficLight.UNKNOWN)
 
         rospy.spin()
 
@@ -255,10 +262,12 @@ class TLDetector(object):
             return TrafficLight.UNKNOWN
         else:
             # Cropped for Vladimir's trained simulaotr images
-            # crop = cv2.resize(cv_image, (300, 200), interpolation=cv2.INTER_CUBIC)
+
+            # Downsample image for faster processing
+            # cv_image[::2, ::2, :]
             state = self.light_classifier.get_classification(cv_image)
 
-            rospy.loginfo("traffi light detected state: %s", state)
+            rospy.loginfo("Traffic light detected state: %s", state)
             return state
 
     def process_traffic_lights(self):
@@ -307,11 +316,11 @@ class TLDetector(object):
                 self.waypoints.waypoints[car_position].pose.pose.position.y
             )
 
-        rospy.loginfo("[test] car_position: %s", car_position)
-        rospy.loginfo("[test] light_pos_wp: %s", light_pos_wp)
-        rospy.loginfo("[test] next_light_pos: %s", light_wp)
-        rospy.loginfo("[test] light: %s", light)
-        rospy.loginfo("[test] light_distance: %s", lane_distance)
+        # rospy.loginfo("[test] car_position: %s", car_position)
+        # rospy.loginfo("[test] light_pos_wp: %s", light_pos_wp)
+        # rospy.loginfo("[test] next_light_pos: %s", light_wp)
+        # rospy.loginfo("[test] light: %s", light)
+        # rospy.loginfo("[test] light_distance: %s", lane_distance)
 
         if light:
             state = self.get_light_state(light)

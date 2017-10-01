@@ -5,9 +5,9 @@ import os
 from styx_msgs.msg import TrafficLight
 
 # Dependecy imports
-import tensorflow as tf
 import numpy as np
-import cv2
+import tensorflow as tf
+import rospy
 
 class TLClassifier(object):
     """By give image inpy detect and classify traffic lights.
@@ -42,7 +42,6 @@ class TLClassifier(object):
         image: traffic light cropped from image
         """
 
-
         states = [TrafficLight.GREEN, TrafficLight.YELLOW, TrafficLight.RED]
 
         best_state = TrafficLight.UNKNOWN
@@ -51,14 +50,14 @@ class TLClassifier(object):
             _image = image.copy()
 
             if state == TrafficLight.RED:
-                _image = _image[int(image.shape[0] * 0.2) - 5: int(image.shape[0] * 0.2) + 5,
-                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+                _image = _image[int(image.shape[0] * 0.2) - 3: int(image.shape[0] * 0.2) + 3,
+                                int(image.shape[1] * 0.5) - 3: int(image.shape[1] * 0.5) + 3]
             if state == TrafficLight.YELLOW:
-                _image = _image[int(image.shape[0] * 0.55) - 5: int(image.shape[0] * 0.55) + 5,
-                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+                _image = _image[int(image.shape[0] * 0.55) - 3: int(image.shape[0] * 0.55) + 3,
+                                int(image.shape[1] * 0.5) - 3: int(image.shape[1] * 0.5) + 3]
             if state == TrafficLight.GREEN:
-                _image = _image[int(image.shape[0] * 0.85) - 5: int(image.shape[0] * 0.85) + 5,
-                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+                _image = _image[int(image.shape[0] * 0.85) - 3: int(image.shape[0] * 0.85) + 3,
+                                int(image.shape[1] * 0.5) - 3: int(image.shape[1] * 0.5) + 3]
 
             if _image[np.where(np.squeeze(_image) > 250)].shape[0] > 15:
                 best_state = state
@@ -108,13 +107,18 @@ class TLClassifier(object):
 
         color_count = {}
         for bbox in bboxes:
-            color = self.color_detector(self.crop_bbox(image, bbox))
 
-            if color != TrafficLight.UNKNOWN:
-                if color not in color_count:
-                    color_count[color] = 1
+            traffic_light_crop = self.crop_bbox(image, bbox)
+            if traffic_light_crop.shape[0] > 3 * 10 and traffic_light_crop.shape[1] > 10:
+                state = self.color_detector(traffic_light_crop)
+            else:
+                continue
+
+            if state != TrafficLight.UNKNOWN:
+                if state not in color_count:
+                    color_count[state] = 1
                 else:
-                    color_count[color] += 1
+                    color_count[state] += 1
 
         if color_count:
             return max(color_count, key=color_count.get)
@@ -125,6 +129,8 @@ class TLClassifier(object):
         """Load protobuf Tensorflow graph with weights, session and tensors"""
 
         model_path = self.model_dir + 'object_detection/frozen_inference_graph.pb'
+
+        rospy.loginfo("model_path %s", model_path)
 
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default(): # pylint: disable=E1129
