@@ -1,9 +1,98 @@
+# Standard imports
+import os
+
+# Local imports
 from styx_msgs.msg import TrafficLight
 
+# Dependecy imports
+import tensorflow as tf
+import numpy as np
+import cv2
+
 class TLClassifier(object):
+    """By give image inpy detect and classify traffic lights.
+
+    Possible states:
+        TrafficLight.RED
+        TrafficLight.YELLOW
+        TrafficLight.GREEN
+        TrafficLight.UNKNOWN
+
+    """
+
     def __init__(self):
-        #TODO load classifier
-        pass
+
+        self.model_dir = '/'.join(os.path.abspath(__file__).split('/')[0:-5]) + '/'
+
+        self.detection_graph = None # Loaded and then used for inference
+
+        # TF Tensors
+        self.image_tensor = None
+        self.detection_boxes = None
+        self.detection_scores = None
+        self.detection_classes = None
+
+        # Load graph, session and tensors as class variables
+        self._load_graph()
+
+    def color_detector(self, image):
+        """
+        Detect color of traffic light based on pixel values.
+
+        image: traffic light cropped from image
+        """
+
+
+        states = [TrafficLight.GREEN, TrafficLight.YELLOW, TrafficLight.RED]
+
+        best_state = TrafficLight.UNKNOWN
+        for state in states:
+
+            _image = image.copy()
+
+            if state == TrafficLight.RED:
+                _image = _image[int(image.shape[0] * 0.2) - 5: int(image.shape[0] * 0.2) + 5,
+                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+            if state == TrafficLight.YELLOW:
+                _image = _image[int(image.shape[0] * 0.55) - 5: int(image.shape[0] * 0.55) + 5,
+                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+            if state == TrafficLight.GREEN:
+                _image = _image[int(image.shape[0] * 0.85) - 5: int(image.shape[0] * 0.85) + 5,
+                                int(image.shape[1] * 0.5) - 5: int(image.shape[1] * 0.5) + 5]
+
+            if _image[np.where(np.squeeze(_image) > 250)].shape[0] > 15:
+                best_state = state
+
+        return best_state
+
+    def crop_bbox(self, img, bbox, extend_x=0, extend_y=0):
+        """Crop ROI from bounding boxes."""
+        im_shape = img.shape
+
+        y_0, x_0, y_1, x_1 = bbox
+
+        x_0 = int(img.shape[1] * x_0)
+        x_1 = int(img.shape[1] * x_1)
+        y_0 = int(img.shape[0] * y_0)
+        y_1 = int(img.shape[0] * y_1)
+
+        y_start = y_0 - extend_y
+        y_end = y_1 + extend_y
+        x_start = x_0 - extend_x
+        x_end = x_1 + extend_x
+
+        if y_start <= 0:
+            y_start = 0
+        if y_end >= im_shape[0]:
+            y_end = im_shape[0]
+        if x_start <= 0:
+            x_start = 0
+        if x_end >= im_shape[1]:
+            x_end = im_shape[1]
+
+        crop = img[y_start: y_end, x_start: x_end]
+
+        return crop
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -15,5 +104,71 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #TODO implement light color prediction
-        return TrafficLight.UNKNOWN
+        bboxes = self._locate_traffic_lights(image)
+
+        color_count = {}
+        for bbox in bboxes:
+            color = self.color_detector(self.crop_bbox(image, bbox))
+
+            if color != TrafficLight.UNKNOWN:
+                if color not in color_count:
+                    color_count[color] = 1
+                else:
+                    color_count[color] += 1
+
+        if color_count:
+            return max(color_count, key=color_count.get)
+        else:
+            return TrafficLight.UNKNOWN
+
+    def _load_graph(self):
+        """Load protobuf Tensorflow graph with weights, session and tensors"""
+
+        model_path = self.model_dir + 'object_detection/frozen_inference_graph.pb'
+
+        self.detection_graph = tf.Graph()
+        with self.detection_graph.as_default(): # pylint: disable=E1129
+
+            od_graph_def = tf.GraphDef()
+
+            with tf.gfile.GFile(model_path, 'rb') as fid:
+
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
+
+        self.sess = tf.Session(graph=self.detection_graph)
+
+        # Definite input and output Tensors for detection_graph
+        self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
+
+        # Each box represents a part of the image where a particular object was detected.
+        self.detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
+
+        # Each score represent how level of confidence for each of the objects.
+        # Score is shown on the result image, together with the class label.
+        self.detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
+        self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
+
+
+    def _locate_traffic_lights(self, image):
+        """Run traffic light TF detection.
+
+        image: numpy array, uint8
+        """
+
+        image_np_expanded = np.expand_dims(image, axis=0)
+
+        (boxes, scores, classes) = self.sess.run(
+            [self.detection_boxes, self.detection_scores, self.detection_classes],
+            feed_dict={self.image_tensor: image_np_expanded}
+        )
+
+        boxes = np.squeeze(boxes)
+        classes = np.squeeze(classes).astype(np.int32)
+        scores = np.squeeze(scores)
+
+        # Select only traffic lights from all possible classes and with confidence higher than 0.8
+        boxes = boxes[(classes == 10) & (scores > 0.8)]
+
+        return boxes
