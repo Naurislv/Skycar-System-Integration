@@ -109,7 +109,7 @@ class TLClassifier(object):
         for bbox in bboxes:
 
             traffic_light_crop = self.crop_bbox(image, bbox)
-            if traffic_light_crop.shape[0] > 3 * 10 and traffic_light_crop.shape[1] > 10:
+            if traffic_light_crop.shape[0] > 3 * 7 and traffic_light_crop.shape[1] > 7:
                 state = self.color_detector(traffic_light_crop)
             else:
                 continue
@@ -132,6 +132,10 @@ class TLClassifier(object):
 
         rospy.loginfo("model_path %s", model_path)
 
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        config.log_device_placement = True
+
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default(): # pylint: disable=E1129
 
@@ -143,7 +147,7 @@ class TLClassifier(object):
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
 
-        self.sess = tf.Session(graph=self.detection_graph)
+        self.sess = tf.Session(graph=self.detection_graph, config=config)
 
         # Definite input and output Tensors for detection_graph
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
@@ -175,6 +179,6 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
 
         # Select only traffic lights from all possible classes and with confidence higher than 0.8
-        boxes = boxes[(classes == 10) & (scores > 0.8)]
+        boxes = boxes[(classes == 10) & (scores > 0.7)]
 
         return boxes
