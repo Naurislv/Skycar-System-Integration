@@ -5,7 +5,4 @@ devel
 
 profile.tmp
 
-catkin_ws/
 .vscode
-
-object_detection/
