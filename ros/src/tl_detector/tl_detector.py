@@ -24,9 +24,9 @@ import math
 
 STATE_COUNT_THRESHOLD = 3
 
-USE_GROUND_TRUTH = True         # Use the ground truth traffic light data on /vehicle/traffic_lights
-                                # This is to allow a build of the final waypoint controllers before
-                                #   the traffic light classification has been developed
+USE_GROUND_TRUTH = False         # Use the ground truth traffic light data on /vehicle/traffic_lights
+                                 # This is to allow a build of the final waypoint controllers before
+                                 #   the traffic light classification has been developed
 
 class TLDetector(object):
     """Traffic Light detection and classifaction. Results publishing to ROS nodes."""
@@ -256,14 +256,10 @@ class TLDetector(object):
         else:
             # Cropped for Vladimir's trained simulaotr images
             # crop = cv2.resize(cv_image, (300, 200), interpolation=cv2.INTER_CUBIC)
+            state = self.light_classifier.get_classification(cv_image)
 
-            # self._collect_ground_truth(crop, self.lights)
-
-            # self.deb_img.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
-            # rosrun image_view image_view image:=/deb_img
-            pass
-
-        return TrafficLight.UNKNOWN
+            rospy.loginfo("traffi light detected state: %s", state)
+            return state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
