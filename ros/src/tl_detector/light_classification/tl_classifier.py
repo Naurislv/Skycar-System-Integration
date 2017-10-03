@@ -9,7 +9,9 @@ import numpy as np
 import tensorflow as tf
 import rospy
 
-class TLClassifier(object):
+from keras.models import model_from_json
+
+class _TLClassifier(object):
     """By give image inpy detect and classify traffic lights.
 
     Possible states:
@@ -179,6 +181,56 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
 
         # Select only traffic lights from all possible classes and with confidence higher than 0.8
-        boxes = boxes[(classes == 10) & (scores > 0.7)]
+        boxes = boxes[(classes == 10) & (scores > 0.65)]
 
         return boxes
+
+
+class TLClassifier(object):
+    """By give image inpy detect and classify traffic lights.
+
+    Possible states:
+        TrafficLight.RED
+        TrafficLight.YELLOW
+        TrafficLight.GREEN
+        TrafficLight.UNKNOWN
+
+    """
+
+    def __init__(self):
+
+        self.model_dir = '/'.join(os.path.abspath(__file__).split('/')[0:-5]) + '/'
+
+        self.graph = None
+
+        # Load graph, session and tensors as class variables
+        self._load_graph()
+
+    def get_classification(self, image):
+        """Determines the color of the traffic light in the image
+
+        Args:
+            image (cv::Mat): image containing the traffic light
+
+        Returns:
+            int: ID of traffic light color (specified in styx_msgs/TrafficLight)
+
+        """
+        with self.graph.as_default():
+            state = np.argmax(self.model.predict(np.expand_dims(image, 0)), axis=1)[0]
+
+        rospy.loginfo('STATE: %s', state)
+        if state == 0:
+            return TrafficLight.RED
+        else:
+            return TrafficLight.GREEN
+
+    def _load_graph(self):
+        """Load Keras model."""
+
+        model_path = self.model_dir + 'object_detection/kerasmodel'
+
+        self.model = model_from_json(open(model_path + '.json', 'r').read())
+        self.model.load_weights(model_path + '.h5')
+
+        self.graph = tf.get_default_graph()
