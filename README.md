@@ -22,7 +22,7 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 3. Control subsystems
 
-    * DBW (Drive By Wire) - takes target trajectory information as input and sends control commands to navigate the vehicle.
+    * DBW (Drive By Wire) - takes target trajectory information as input and sends control commands to navigate the vehicle. Detailed docs can be found [here](./controller_docs.md)
 
 ![carla-ros-graph-v2](imgs/carla-ros-graph-v2.png)
 
@@ -32,7 +32,7 @@ __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en
 
 __Neil Maude__ (<neil.maude@gmail.com>): General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
 
-__Martin Liesenberg:__ Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
+__Martin Liesenberg__ (<martin.liesenberg@gmail.com>): Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
 
 __Alexander Noll:__ Data Scientist at [PartnerRe](http://partnerre.com/). PhD in Mathematics from University of Vienna, MSc in Engineering Physics from TU Graz. Interested in machine learning, statistics, artificial intelligence and self-driving cars. [Github](https://github.com/NOllAl)
 
