@@ -102,19 +102,19 @@ class TLDetector(object):
 
         best_waypoint = None
 
-        def distance(x1, y1, x2, y2):
+        def distance2D(x1, y1, x2, y2):
             """Calculates dinstace from one point to another in 2D"""
             delta_x = x1 - x2
             delta_y = y1 - y2
             return math.sqrt(delta_x * delta_x + delta_y * delta_y)
 
         wps = waypoints.waypoints
-        min_dist = distance(pos_x, pos_y,
+        min_dist = distance2D(pos_x, pos_y,
                                  wps[0].pose.pose.position.x,
                                  wps[0].pose.pose.position.y)
 
         for i, point in enumerate(wps):
-            dist = distance(pos_x, pos_y,
+            dist = distance2D(pos_x, pos_y,
                                  point.pose.pose.position.x,
                                  point.pose.pose.position.y)
             if dist < min_dist:
