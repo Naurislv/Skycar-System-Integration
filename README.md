@@ -29,7 +29,7 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 |     Image              |     Role      |      Name      |    Location   | LinkedIn    |     email   |
 |------------------------|---------------|----------------|---------------|-------------|-------------|
 | <img src="./imgs/nauris_dorbe.jpg" alt="Nauris Dorbe" width="150" height="150"> |__Team Lead__| Nauris Dorbe | Latvia, Riga | [Nauris](https://www.linkedin.com/in/naurisdorbe) | <naurisdorbe@gmail.com> |
-| <img src="./imgs/neilmaude.jpg" alt="Neil Maude" width="150" height="150">| | Neil Maude | Leeds, UK | [Neil](https://www.linkedin.com/in/neilmaude)| <neil.maude@gmail.com> |
+| <img src="./imgs/neilmaude.jpg" alt="Neil Maude" width="150" height="150">| | Neil Maude | UK, Leeds | [Neil](https://www.linkedin.com/in/neilmaude)| <neil.maude@gmail.com> |
 | | | Martin Liesenberg | Germany, Berlin | | <martin.liesenberg@gmail.com> |
 | | | Alexander Noll |  | | |
 | | | Jonas Biehler |  | | |
