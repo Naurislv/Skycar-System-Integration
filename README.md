@@ -28,11 +28,19 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 ## The Team
 
+|     Image              |     Role      |      Name      |    Location   | LinkedIn    |     email   |
+|------------------------|---------------|----------------|---------------|-------------|-------------|
+| <img src="./imgs/nauris_dorbe.jpg" alt="Nauris Dorbe" width="150" height="150"> |__Team Lead__| Nauris Dorbe | Latvia, Riga | [Nauris](https://www.linkedin.com/in/naurisdorbe) | <naurisdorbe@gmail.com> |
+| | | Neil Maude |  | | <martin.liesenberg@gmail.com> |
+| | | Martin Liesenberg |  | | |
+| | | Alexander Noll |  | | |
+| | | Jonas Biehler |  | | |
+
 __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor candidate at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
 
-__Neil Maude__ (<neil.maude@gmail.com>): General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
+__Neil Maude:__ (<neil.maude@gmail.com>): General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
 
-__Martin Liesenberg__ (<martin.liesenberg@gmail.com>): Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
+__Martin Liesenberg:__ Software Engineer at [BCG Digital Ventures](https://bcgdv.com/). MsC in Computer Science from FU Berlin. Interested in and working with machine learning, stream processing and autonomous vehicles. [Github](https://github.com/mliesenberg)
 
 __Alexander Noll:__ Data Scientist at [PartnerRe](http://partnerre.com/). PhD in Mathematics from University of Vienna, MSc in Engineering Physics from TU Graz. Interested in machine learning, statistics, artificial intelligence and self-driving cars. [Github](https://github.com/NOllAl)
 
