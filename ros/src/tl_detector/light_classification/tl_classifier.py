@@ -10,6 +10,12 @@ import tensorflow as tf
 import rospy
 
 from keras.models import model_from_json
+import keras.backend.tensorflow_backend as K
+
+K_CONFIG = K.tf.ConfigProto()
+K_CONFIG.allow_soft_placement = True
+K_CONFIG.gpu_options.allow_growth = True
+K.set_session(K.tf.Session(config=K_CONFIG))
 
 class _TLClassifier(object):
     """By give image inpy detect and classify traffic lights.

@@ -24,7 +24,7 @@ import math
 
 STATE_COUNT_THRESHOLD = 3
 
-USE_GROUND_TRUTH = False          # Use the ground truth traffic light data on /vehicle/traffic_lights
+USE_GROUND_TRUTH = False         # Use the ground truth traffic light data on /vehicle/traffic_lights
                                  # This is to allow a build of the final waypoint controllers before
                                  #   the traffic light classification has been developed
 
@@ -111,14 +111,6 @@ class TLDetector(object):
 
         if USE_GROUND_TRUTH:
             light_wp, state = self.process_ground_truth_lights()
-
-            # To collect data
-            # if state != TrafficLight.RED and state != TrafficLight.YELLOW and state != TrafficLight.GREEN:
-            # state = 3
-            # cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-            # cv_image = cv2.resize(cv_image, (400, 300))
-            # cv2.imwrite('/home/nauris/Downloads/traffic_light_images/{}/{}.png'.format(state, time.time()), cv_image)
-            # rospy.loginfo("saved: %s", '/home/nauris/Downloads/traffic_light_images/{}/{}.png'.format(state, time.time()))
         else:
             light_wp, state = self.process_traffic_lights()
 
@@ -274,7 +266,6 @@ class TLDetector(object):
 
             # Downsample image for faster processing
             cv_image = cv2.resize(cv_image, (400, 300))
-            # cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
             cv2.imwrite('/home/nauris/Downloads/sim_data/{}.png'.format(time.time()), cv_image)
             start_time = time.time()
