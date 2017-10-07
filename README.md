@@ -1,7 +1,5 @@
 # Team Skynet - self-driving car system integration
 
-## TODO: Short Project Description
-
 Self Driving car basic system architecture
 ![general-system-arch](imgs/system_arch.png)
 
@@ -31,8 +29,8 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 |     Image              |     Role      |      Name      |    Location   | LinkedIn    |     email   |
 |------------------------|---------------|----------------|---------------|-------------|-------------|
 | <img src="./imgs/nauris_dorbe.jpg" alt="Nauris Dorbe" width="150" height="150"> |__Team Lead__| Nauris Dorbe | Latvia, Riga | [Nauris](https://www.linkedin.com/in/naurisdorbe) | <naurisdorbe@gmail.com> |
-| | | Neil Maude |  | | <martin.liesenberg@gmail.com> |
-| | | Martin Liesenberg |  | | |
+| | | Neil Maude |  | | <neil.maude@gmail.com> |
+| | | Martin Liesenberg | Germany, Berlin | | <martin.liesenberg@gmail.com> |
 | | | Alexander Noll |  | | |
 | | | Jonas Biehler |  | | |
 
