@@ -4,7 +4,6 @@ import rospy
 from std_msgs.msg import Bool
 from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
 from geometry_msgs.msg import TwistStamped
-import math
 
 from twist_controller import Controller
 
@@ -41,7 +40,7 @@ class DBWNode(object):
 
         # default to drive-by-wire not enabled - will pick this up from the topic...
         self.dbw_enabled = False
-        self.sampling_rate = 50.0 # 50Hz
+        self.sampling_rate = 10.0 # 50Hz
 
         self.controller = Controller(sampling_rate=self.sampling_rate,
                                      decel_limit=rospy.get_param('~decel_limit', -5),

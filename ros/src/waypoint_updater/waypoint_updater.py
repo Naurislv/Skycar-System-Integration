@@ -30,20 +30,19 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 50          # Number of waypoints we will publish. You can change this number.  Was 200
 
-#STOP_DISTANCE = 50 #100     # Distance to traffic lights within which we may stop the car
-STOP_LINE_OFFSET = 5.0 # Distance back from lights to actually stop the car
-MIN_STOP_DISTANCE = 0.0 #30  # If within this distance, don't stop (already in intersection)
+STOP_LINE_OFFSET = 3.5      # Distance back from stop line to actually stop the car, was 28.5 for light gantry
+MIN_STOP_DISTANCE = 0       # If within this distance, don't stop (already in intersection), was 28.5 for tl
 
-REFERENCE_VELOCITY = 11.0   #4.47   #11.0   # Reference velocity when restarting the car
+REFERENCE_VELOCITY = 11.0   # Reference velocity when restarting the car
                             # 4.47m/s = 10mph
                             # 11.0m/s = ~25mph
-#REFERENCE_DISTANCE = 30     # Distance to get back up to reference velocity
 
 COMFORTABLE_DECEL = 2.0     # A comfortable rate to decelerate
-MAXIMUM_DECEL = 10.0         # Maximum rate to decelerate
-MIN_EMERGENCY_VELOCITY = 5  # 1.5    # Min speed, over which will keep going at late red light
+MAXIMUM_DECEL = 10.0        # Maximum rate to decelerate
+MIN_EMERGENCY_VELOCITY = 5  # Min speed, over which will keep going at late red light, was 1.5
+                            # If going slower, will do an emergency stop so as not to go through intersection
 
 # Control states
 CONTROL_STATE_UNKNOWN = -1
@@ -105,28 +104,26 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # Add other member variables you need below
-        # Format of self.var = init_value - declare and initialise
-        self.closest_waypoint = -1
-        self.next_red_light = -1
-        self.dbw_enabled = False
-        self.current_velocity = 0.0
-        self.control_state = CONTROL_STATE_UNKNOWN
-        self.pose_x = -1.0
-        self.pose_y = -1.0
+        self.closest_waypoint = -1                      # closest waypoint to car
+        self.next_stop_line = -1                        # waypoint ID of stop line for a red light
+        self.dbw_enabled = False                        # Is drive-by-wire enabled (vs manual driving)
+        self.current_velocity = 0.0                     # Car current velocity
+        self.control_state = CONTROL_STATE_UNKNOWN      # Car control state / finite state machine
+        self.pose_x = -1.0                              # Car position x
+        self.pose_y = -1.0                              # Car position y
 
         # Will need a list of waypoints
-        self.waypoints = []
+        self.waypoints = []                             # List of waypoints for track
 
-        self.sampling_rate = 10.0  # 50Hz rate for the main loop
+        self.sampling_rate = 10.0                       # Rate for the main loop - was 50Hz originally
         self.loop()
-        #rospy.spin()
 
     def loop(self):
         """
             Loop function to publish waypoints for car to follow
         :return:
         """
-        rate = rospy.Rate(self.sampling_rate) # Was 50Hz
+        rate = rospy.Rate(self.sampling_rate)       # Was 50Hz
         while not rospy.is_shutdown():
 
             # find the closest waypoint, checking that we've had a position update already
@@ -161,20 +158,20 @@ class WaypointUpdater(object):
                         d < V^2 / C
 
                 """
-                if self.next_red_light > 0:
+                if self.next_stop_line > 0:
                     # red light ahead, near or far
-                    distance_to_red = self.distance(self.waypoints, self.closest_waypoint,
-                                                    self.next_red_light)
+                    distance_to_stop_line = self.distance(self.waypoints, self.closest_waypoint,
+                                                    self.next_stop_line)
                     comfort_stopping_distance = (self.current_velocity * self.current_velocity)
                     comfort_stopping_distance = comfort_stopping_distance / COMFORTABLE_DECEL
                     minimum_stop_distance = self.current_velocity * self.current_velocity
                     minimum_stop_distance = minimum_stop_distance / MAXIMUM_DECEL
-                    if (distance_to_red - STOP_LINE_OFFSET) < comfort_stopping_distance:
+                    if (distance_to_stop_line - STOP_LINE_OFFSET) < comfort_stopping_distance:
                         if self.control_state == CONTROL_STATE_DRIVING and \
-                                        (distance_to_red - STOP_LINE_OFFSET) < minimum_stop_distance:
+                                        (distance_to_stop_line - STOP_LINE_OFFSET) < minimum_stop_distance:
                             # keep going, or will stop within intersection?
                             if self.current_velocity < MIN_EMERGENCY_VELOCITY and \
-                                            distance_to_red > STOP_LINE_OFFSET:
+                                            distance_to_stop_line > STOP_LINE_OFFSET:
                                 # can stop
                                 rospy.loginfo("[test] Emergency stop case")
                                 self.control_state = CONTROL_STATE_STOPPING
@@ -200,9 +197,9 @@ class WaypointUpdater(object):
                         rospy.loginfo("[test] Changing to *DRIVING* state")
                     self.control_state = CONTROL_STATE_DRIVING
 
-                # if next_red_light > 0 and self.control_state == CONTROL_STATE_STOPPING:
-                #     # test code to give some info on the distance to the red light waypoint
-                #     rospy.loginfo("[test] Distance to red light = " + str(distance_to_red) + ",
+                # if distance_to_stop_line > 0 and self.control_state == CONTROL_STATE_STOPPING:
+                #     # test code to give some info on the distance to the red light stop line waypoint
+                #     rospy.loginfo("[test] Distance to red light stop line = " + str(distance_to_stop_line) + ",
                 #                   current vel = " + str(self.current_velocity) +
                 #                   ", target vel = " + str(start_point_velocity))
 
@@ -212,12 +209,12 @@ class WaypointUpdater(object):
                 if self.control_state == CONTROL_STATE_STOPPING:
                     # smoothly stop over the waypoints up to next_red_light waypoint
                     # setting desired velocity at each
-                    for i in range(self.closest_waypoint, self.next_red_light + 1):
+                    for i in range(self.closest_waypoint, self.next_stop_line + 1):
                         # get the distance to the i-th way point
                         i_point_distance = self.distance(self.waypoints, self.closest_waypoint, i)
-                        if (distance_to_red - STOP_LINE_OFFSET) > 0:
+                        if (distance_to_stop_line - STOP_LINE_OFFSET) > 0:
                             i_point_target_velocity = i_point_distance
-                            i_point_target_velocity /= (distance_to_red - STOP_LINE_OFFSET)
+                            i_point_target_velocity /= (distance_to_stop_line - STOP_LINE_OFFSET)
                             i_point_target_velocity *= (start_point_velocity * -1)
                             i_point_target_velocity += start_point_velocity
                         else:
@@ -247,7 +244,6 @@ class WaypointUpdater(object):
             lane = Lane()
             lane.waypoints = waypoints_ahead  # list of waypoints ahead of the car
             lane.header.stamp = rospy.Time(0)  # timestamp
-            # lane.header.frame_id = msg.header.frame_id      # match up with the input message frame_id
             # publish the waypoints list
             self.final_waypoints_pub.publish(lane)
 
@@ -291,7 +287,8 @@ class WaypointUpdater(object):
         :return:
         """
         # Callback for /traffic_waypoint message. Implement
-        self.next_red_light = msg.data       # get the waypoint ref of the next red light (-1 if none)
+        # get the waypoint ref of the **stop line** for the next red light (-1 if none)
+        self.next_stop_line = msg.data
 
     def obstacle_cb(self, msg):
         """
