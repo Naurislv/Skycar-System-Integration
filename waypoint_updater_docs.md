@@ -59,7 +59,7 @@ The velocity planning for the _DRIVING_ state is simply to set the upcoming wayp
 The velocity planning for the _SLOWING_ state is to assign velocities to the waypoints up to stop line which decrease linearly from the current car velocity to zero.
 
 #### Stop line location
-The waypoint location of the red light is the location of the light post, but this is not the location where the car should stop and stopping at this location would mean that the car had driven through the intersection.  
+The waypoint location of the red light is the location of the stop line on the entry to the intersection.  Using this exact location was found to lead to the car entering the intersection and therefore an offset parameter was used to adjust the point at which the car stops.  
 
 The offset of the intersection stop line was determined empirically and is held in the `STOP_LINE_OFFSET` constant.  (Note that in practice this is will vary and additional map data/road sensing would be required to determine the stop location accurately.)
 
