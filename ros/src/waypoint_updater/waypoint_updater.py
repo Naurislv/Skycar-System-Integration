@@ -35,7 +35,7 @@ LOOKAHEAD_WPS = 50          # Number of waypoints we will publish. You can chang
 STOP_LINE_OFFSET = 3.5      # Distance back from stop line to actually stop the car, was 28.5 for light gantry
 MIN_STOP_DISTANCE = 0       # If within this distance, don't stop (already in intersection), was 28.5 for tl
 
-REFERENCE_VELOCITY = 11.0   # Reference velocity when restarting the car
+REFERENCE_VELOCITY = 4.5   # Reference velocity when restarting the car
                             # 4.47m/s = 10mph
                             # 11.0m/s = ~25mph
 
