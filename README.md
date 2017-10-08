@@ -1,11 +1,26 @@
 # Team Skynet - self-driving car system integration
 
-Self Driving car basic system architecture
+__Mission:__ Control CARLAs (self driving car) throttle, steering and brakes to succefully navigate map waypoints.
+
+Before runing our code on CARLA we made it work in simulator. Simulator works very similar to CARLA as all ROS nodes and topics are same so basically if our system would work in simulator it should also work on CARLA except obstacles (e.g. traffic light) detection/classification is little bit different because of pixel inputs. To start using this repo please review first [this section](#project-details).
+
+## Running Skycar
+
+When simulator, ROS and catkin environment is up and running then you should now be able to run this project.
+
+1. Navigate to repository
+2. Navigate to ros directory: `cd ros`
+
+3. Run
+
+   * Simulator:  `./run_skycar_styx`
+   * CARLA (site): `./run_skycar_site`
+
+## Self Driving car basic system architecture. Principle behind systems architecture.
+
 ![general-system-arch](imgs/system_arch.png)
 
 ## CARLA
-
-__Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate map waypoints.
 
 ### CARLAs ROS Nodes:
 
@@ -18,11 +33,11 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 2. Planning
 
-    * Waypoint Updater - sets target velocity for each waypoint based on upcomming traffic lights and obstacles. A more detailed documentation can be found [here](./waypoint_updater_docs.md)
+    * Waypoint Updater - sets target velocity for each waypoint based on upcomming traffic lights and obstacles. A more detailed documentation can be found [here](./waypoint_updater_docs.md).
 
 3. Control subsystems
 
-    * DBW (Drive By Wire) - takes target trajectory information as input and sends control commands to navigate the vehicle. Detailed docs can be found [here](./controller_docs.md)
+    * DBW (Drive By Wire) - takes target trajectory information as input and sends control commands to navigate the vehicle. Detailed docs can be found [here](./controller_docs.md).
 
 ![carla-ros-graph-v2](imgs/carla-ros-graph-v2.png)
 
@@ -46,7 +61,7 @@ __Alexander Noll:__ Data Scientist at [PartnerRe](http://partnerre.com/). PhD in
 
 __Jonas Biehler:__ Research Engineer at AdCo Engineering. Phd in Computational Mechanics. Interested in Simulation, AI, Machine Learning, HPC, and self-drinving cars. [Github](https://github.com/jbi35), [LinkedIn](https://www.linkedin.com/in/jonas-biehler-82138a9a/)
 
-# Original repo README
+# Project details
 
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
