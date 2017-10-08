@@ -203,7 +203,9 @@ class TLClassifier(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, sim=True):
+
+        self.sim = sim
 
         self.model_dir = '/'.join(os.path.abspath(__file__).split('/')[0:-5]) + '/'
 
@@ -223,7 +225,7 @@ class TLClassifier(object):
 
         """
         with self.graph.as_default():
-            state = np.argmax(self.model.predict(np.expand_dims(image, 0)), axis=1)[0]
+            state = round(self.model.predict(np.expand_dims(image, 0))[0, 0])
 
         rospy.loginfo('STATE: %s', state)
         if state == 0:
@@ -234,7 +236,10 @@ class TLClassifier(object):
     def _load_graph(self):
         """Load Keras model."""
 
-        model_path = self.model_dir + 'object_detection/kerasmodel'
+        if self.sim:
+            model_path = self.model_dir + 'object_detection/kerasmodel'
+        else:
+            model_path = self.model_dir + 'object_detection/keras_udacitymodel'
 
         self.model = model_from_json(open(model_path + '.json', 'r').read())
         self.model.load_weights(model_path + '.h5')
