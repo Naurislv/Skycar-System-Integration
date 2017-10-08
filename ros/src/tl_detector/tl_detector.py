@@ -51,7 +51,7 @@ class TLDetector(object):
         self.lights = []
 
         # Load classifier before starting substribers because it takes some time
-        self.light_classifier = TLClassifier()
+        self.light_classifier = TLClassifier(sim=True)
 
         _ = rospy.Subscriber('/current_pose', PoseStamped, callback=self.pose_cb)
         self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane,
