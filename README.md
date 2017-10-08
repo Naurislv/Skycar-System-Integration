@@ -32,7 +32,7 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 | <img src="./imgs/neilmaude.jpg" alt="Neil Maude" width="150" height="150">| | Neil Maude | UK, Leeds | [Neil](https://www.linkedin.com/in/neilmaude)| <neil.maude@gmail.com> |
 | | | Martin Liesenberg | Germany, Berlin | | <martin.liesenberg@gmail.com> |
 | | | Alexander Noll |  | | |
-| | | Jonas Biehler |  | | |
+| | | Jonas Biehler | Germany, Munich  | [Jonas](https://www.linkedin.com/in/jonas-biehler-82138a9a/) |<biehler.jonas@gmail.com> |
 
 __Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor student at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
 
