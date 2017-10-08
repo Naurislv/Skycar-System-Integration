@@ -1,7 +1,5 @@
 # Team Skynet - self-driving car system integration
 
-## TODO: Short Project Description
-
 Self Driving car basic system architecture
 ![general-system-arch](imgs/system_arch.png)
 
@@ -31,12 +29,12 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 |     Image              |     Role      |      Name      |    Location   | LinkedIn    |     email   |
 |------------------------|---------------|----------------|---------------|-------------|-------------|
 | <img src="./imgs/nauris_dorbe.jpg" alt="Nauris Dorbe" width="150" height="150"> |__Team Lead__| Nauris Dorbe | Latvia, Riga | [Nauris](https://www.linkedin.com/in/naurisdorbe) | <naurisdorbe@gmail.com> |
-| | | Neil Maude |  | | <martin.liesenberg@gmail.com> |
-| | | Martin Liesenberg |  | | |
+| <img src="./imgs/neilmaude.jpg" alt="Neil Maude" width="150" height="150">| | Neil Maude | UK, Leeds | [Neil](https://www.linkedin.com/in/neilmaude)| <neil.maude@gmail.com> |
+| | | Martin Liesenberg | Germany, Berlin | | <martin.liesenberg@gmail.com> |
 | | | Alexander Noll |  | | |
 | | | Jonas Biehler |  | | |
 
-__Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor candidate at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
+__Nauris Dorbe:__ Machine Learning Expert at [SqualioCC](http://squaliocc.com/en), Researcher assistant at [EDI](http://edi.lv/en/home/) and Doctor student at [University of Latvia](https://www.lu.lv/eng/). Interested in Machine Learning and Self Driving cars. [Github](https://github.com/Naurislv). [LinkedIn](https://www.linkedin.com/in/naurisdorbe). [Twitter](https://twitter.com/NaurisDorbe)
 
 __Neil Maude:__ (<neil.maude@gmail.com>): General Manager at [Arena Group EDM](http://www.arenagroup.net/).  MA (Math/Computing), University of Oxford. MBA, Warwick Business School. Interested in AI, Machine Learning, Data Visualisation and Self Driving Cars/Autonomous Vehicles. [Github](https://github.com/NeilMaude). [LinkedIn](https://www.linkedin.com/in/neilmaude). [Twitter](https://twitter.com/nmaude2006).
 
