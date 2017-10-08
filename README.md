@@ -1,12 +1,12 @@
 # Team Skynet - self-driving car system integration
 
-__Mission:__ Control CARLAs (self driving car) throttle, steering and brakes to succefully navigate map waypoints.
+__Mission:__ Control CARLAs (self driving car) throttle, steering and brakes to successfully navigate map waypoints.
 
-Before runing our code on CARLA we made it work in simulator. Simulator works very similar to CARLA as all ROS nodes and topics are same so basically if our system would work in simulator it should also work on CARLA except obstacles (e.g. traffic light) detection/classification is little bit different because of pixel inputs. To start using this repo please review first [this section](#project-details).
+Before running our code on CARLA we made it work in simulator. Simulator works very similar to CARLA as all ROS nodes and topics are same so basically if our system would work in simulator it should also work on CARLA except obstacles (e.g. traffic light) detection/classification is little bit different because of pixel inputs. To start using this repo please review first [this section](#project-details).
 
 ## Running Skycar
 
-When simulator, ROS and catkin environment is up and running then you should now be able to run this project.
+When simulator, ROS and catkin environment is up and running, you should  be able to run this project.
 
 1. Navigate to repository
 2. Navigate to ros directory: `cd ros`
@@ -33,7 +33,7 @@ When simulator, ROS and catkin environment is up and running then you should now
 
 2. Planning
 
-    * Waypoint Updater - sets target velocity for each waypoint based on upcomming traffic lights and obstacles. A more detailed documentation can be found [here](./waypoint_updater_docs.md).
+    * Waypoint Updater - sets target velocity for each waypoint based on upcoming traffic lights and obstacles. A more detailed documentation can be found [here](./waypoint_updater_docs.md).
 
 3. Control subsystems
 
