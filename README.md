@@ -11,12 +11,14 @@ __Mission:__ Control CARLAs throttle, steering and brakes to succefully navigate
 
 1. Perception
 
-    * Traffic light detection -> __/topic__
-    * Obstacle detection -> __/topic__
+    * Traffic light detection - We use a deep neural net to detect if the upcoming
+     the traffic light is red or not. We trained the classifier once with images from the simulator
+     and once with real images from the ROS bag. A detailed description of the architecture and training parameters can be found in the respective notebooks [here](./object_detection/KerasClassificator.ipynb)
+     and [here](./object_detection/KerasClassificatorUdacity.ipynb).
 
 2. Planning
 
-    * Waypoint Updater - sets target velocity for each waypoint based on upcomming traffic lights and obstacles. A more detailed documentation can be found [here](waypoint_updater_docs.md)
+    * Waypoint Updater - sets target velocity for each waypoint based on upcomming traffic lights and obstacles. A more detailed documentation can be found [here](./waypoint_updater_docs.md)
 
 3. Control subsystems
 
