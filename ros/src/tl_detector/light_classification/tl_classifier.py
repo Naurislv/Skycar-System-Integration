@@ -28,13 +28,11 @@ class _TLClassifier(object):
 
     """
 
-    def __init__(self, sim=True):
+    def __init__(self):
 
         self.model_dir = '/'.join(os.path.abspath(__file__).split('/')[0:-5]) + '/'
 
         self.detection_graph = None # Loaded and then used for inference
-
-        self.sim = sim
 
         # TF Tensors
         self.image_tensor = None
@@ -205,7 +203,9 @@ class TLClassifier(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, sim=True):
+
+        self.sim = sim
 
         self.model_dir = '/'.join(os.path.abspath(__file__).split('/')[0:-5]) + '/'
 
