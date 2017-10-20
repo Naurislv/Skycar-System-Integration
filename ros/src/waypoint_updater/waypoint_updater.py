@@ -7,12 +7,14 @@
 
 # Standard imports
 import math
-
+import numpy as np
 # ROS imports
 import rospy
+import tf
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from styx_msgs.msg import Lane              #, Waypoint
 from std_msgs.msg import Int32, Bool
+
 
 
 '''
@@ -49,12 +51,13 @@ CONTROL_STATE_UNKNOWN = -1
 CONTROL_STATE_DRIVING = 1
 CONTROL_STATE_STOPPING = 2
 
-def get_closest_waypoint(pose_x, pose_y, waypoints):
+def get_closest_waypoint(pose_x, pose_y, theta, waypoints):
     """
         Get the closest waypoint for a given position
 
     :param pose_x:
     :param pose_y:
+    :param theta:
     :param waypoints:
     :return:
     """
@@ -72,6 +75,15 @@ def get_closest_waypoint(pose_x, pose_y, waypoints):
         if distance < closest_distance:
             closest_distance = distance
             closest_point = i
+
+    x = waypoints[closest_point].pose.pose.position.x
+    y = waypoints[closest_point].pose.pose.position.y
+    heading = np.arctan2((y-pose_y), (x-pose_x))
+    angle = np.abs(theta-heading)
+    if angle > np.pi/4.:
+        closest_point += 1
+        if closest_point >= len(waypoints):
+            closest_point = 0
 
     # return closest point found
     return closest_point
@@ -111,7 +123,7 @@ class WaypointUpdater(object):
         self.control_state = CONTROL_STATE_UNKNOWN      # Car control state / finite state machine
         self.pose_x = -1.0                              # Car position x
         self.pose_y = -1.0                              # Car position y
-
+        self.theta  = 0.0                               # Car heading angle
         # Will need a list of waypoints
         self.waypoints = []                             # List of waypoints for track
 
@@ -128,7 +140,7 @@ class WaypointUpdater(object):
 
             # find the closest waypoint, checking that we've had a position update already
             if self.pose_x > -1.0 and self.pose_y > -1.0:
-                self.closest_waypoint = get_closest_waypoint(self.pose_x, self.pose_y, self.waypoints)
+                self.closest_waypoint = get_closest_waypoint(self.pose_x, self.pose_y, self.theta, self.waypoints)
 
             if (self.closest_waypoint > 0) and (self.dbw_enabled):
                 # skip if no position or manual driving
@@ -263,6 +275,13 @@ class WaypointUpdater(object):
         # extract the current car x, y
         self.pose_x = msg.pose.position.x
         self.pose_y = msg.pose.position.y
+        orientation = msg.pose.orientation
+        euler = tf.transformations.euler_from_quaternion([
+            orientation.x,
+            orientation.y,
+            orientation.z,
+            orientation.w])
+        self.theta = euler[2]
 
     def waypoints_cb(self, waypoints):
         """
