@@ -86,6 +86,13 @@ def get_closest_waypoint(pose_x, pose_y, theta, waypoints):
             closest_point = 0
 
     # return closest point found
+
+    # debugging the veering issue
+    if angle > np.pi/4:
+        rospy.loginfo('Veer: nearest waypoint = ' + str(closest_point) + ' set to point ahead')
+    else:
+        rospy.loginfo('Veer: nearest waypoint = ' + str(closest_point) + ' at distance = ' + str(closest_distance))
+
     return closest_point
 
 class WaypointUpdater(object):

@@ -38,6 +38,10 @@ class DBWNode(object):
         self.required_vel_angular = None
         self.current_vel_linear = None
 
+        # debug for veer issue
+        self.last_required_vel_angular = 0.0
+        self.count_required_vel_angular = 0
+
         # default to drive-by-wire not enabled - will pick this up from the topic...
         self.dbw_enabled = False
         self.sampling_rate = 10.0 # 50Hz
@@ -118,6 +122,13 @@ class DBWNode(object):
         # store the received TwistStamped message from the waypoint follower node
         self.required_vel_linear = msg.twist.linear.x
         self.required_vel_angular = msg.twist.angular.z
+
+        # debugging veering issue
+        if self.required_vel_angular <> self.last_required_vel_angular:
+            rospy.loginfo('Veer: received new angular velocity required : ' + str(self.required_vel_angular) + ', count = ' + str(self.count_required_vel_angular))
+            self.count_required_vel_angular = 0
+        self.last_required_vel_angular = self.required_vel_angular
+        self.count_required_vel_angular += 1
 
 if __name__ == '__main__':
     DBWNode()
