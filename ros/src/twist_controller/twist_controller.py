@@ -124,8 +124,9 @@ class Controller(object):
         #   rospy.loginfo('TwistController: Accelerating = ' + str(throttle))
         #if brake <> 0.0:
         #    rospy.loginfo('TwistController: Braking = ' + str(brake))
-        #if abs(steering) <> 0.0:
-        #rospy.loginfo('TwistController: Steering = ' + str(steering))
+        if abs(steering) <> 0.0:
+            #rospy.loginfo('TwistController: Steering = ' + str(steering))
+            rospy.loginfo('Veer: Steering = ' + str(steering) + ', required = ' + str(required_vel_angular))
 
         return throttle, brake, steering
 
