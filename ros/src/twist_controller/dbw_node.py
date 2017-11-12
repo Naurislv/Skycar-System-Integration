@@ -40,7 +40,7 @@ class DBWNode(object):
 
         # default to drive-by-wire not enabled - will pick this up from the topic...
         self.dbw_enabled = False
-        self.sampling_rate = 10.0 # 50Hz
+        self.sampling_rate = 50.0 # 50Hz
 
         self.controller = Controller(sampling_rate=self.sampling_rate,
                                      decel_limit=rospy.get_param('~decel_limit', -5),

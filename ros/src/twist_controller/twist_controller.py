@@ -55,7 +55,7 @@ class Controller(object):
                                   self.decel_limit, self.accel_limit)
 
         # second controller to get throttle signal between 0 and 1
-        self.accel_pid = PID(PID_ACC_P, PID_ACC_I, PID_ACC_D, 0.0, 1.0)
+        self.accel_pid = PID(PID_ACC_P, PID_ACC_I, PID_ACC_D, 0.0, 0.75)
 
 
         # Initialise Yaw controller - this gives steering values using
