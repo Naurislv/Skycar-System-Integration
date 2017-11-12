@@ -95,7 +95,10 @@ class Controller(object):
 
         # TODO think about emergency brake command
         if desired_accel > 0.0:
-            throttle = self.accel_pid.step(desired_accel - self.current_accel, self.delta_t)
+            if desired_accel < self.accel_limit:
+                throttle = self.accel_pid.step(desired_accel - self.current_accel, self.delta_t)
+            else:
+                throttle = self.accel_pid.step(self.accel_limit - self.current_accel, self.delta_t)
             brake = 0.0
         else:
             throttle = 0.0
@@ -103,9 +106,15 @@ class Controller(object):
             self.accel_pid.reset()
             if abs(desired_accel) > self.brake_deadband:
                 # don't bother braking unless over the deadband level
-                brake = abs(desired_accel) * self.brake_torque_const
+                # make sure we do not brake to hard
+                if abs(desired_accel) > abs(self.decel_limit):
+                    brake = abs(self.decel_limit) * self.brake_torque_const
+                else:
+                    brake = abs(desired_accel) * self.brake_torque_const
+
 
         # steering - yaw controller takes desired linear, desired angular, current linear as params
+        #steering = required_vel_angular * self.steer_ratio
         steering = self.yaw_controller.get_steering(required_vel_linear,
                                                     required_vel_angular,
                                                     current_vel_linear)
@@ -115,8 +124,9 @@ class Controller(object):
         #   rospy.loginfo('TwistController: Accelerating = ' + str(throttle))
         #if brake <> 0.0:
         #    rospy.loginfo('TwistController: Braking = ' + str(brake))
-        #if abs(steering) <> 0.0:
-        #    rospy.loginfo('TwistController: Steering = ' + str(steering))
+        if abs(steering) <> 0.0:
+            #rospy.loginfo('TwistController: Steering = ' + str(steering))
+            rospy.loginfo('Veer: Steering = ' + str(steering) + ', required = ' + str(required_vel_angular))
 
         return throttle, brake, steering
 

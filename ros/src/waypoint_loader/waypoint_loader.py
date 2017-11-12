@@ -59,6 +59,7 @@ class WaypointLoader(object):
                 p.pose.pose.orientation = Quaternion(*q)
                 # new udacity version
                 p.twist.twist.linear.x = float(self.velocity*0.27778)
+                p.twist.twist.linear.x = float(self.velocity * 0.44704)
                 #p.twist.twist.linear.x = float(self.velocity)
 
 
